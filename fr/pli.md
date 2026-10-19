@@ -116,9 +116,15 @@ LEARN: PROCEDURE OPTIONS(MAIN);
     CALL SHOW_NUMBER(TOTAL);
     PUT SKIP LIST('5 factorial:', FACT(5));
 
-    /* ON installe un gestionnaire ; SIGNAL declenche une condition. */
-    ON ZERODIVIDE PUT SKIP LIST('Division by zero signalled');
+    /* Sous PL/I-80, un GO TO permet de reprendre apres ZERODIVIDE. */
+    ON ZERODIVIDE BEGIN;
+        PUT SKIP LIST('Division by zero signalled');
+        GO TO AFTER_ZERODIVIDE;
+    END;
+
     SIGNAL ZERODIVIDE;
+
+    AFTER_ZERODIVIDE:
     REVERT ZERODIVIDE;
 
     /* La lecture sur la console s'ecrit : GET LIST(I); */
