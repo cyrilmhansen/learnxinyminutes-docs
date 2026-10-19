@@ -3,16 +3,18 @@ translators:
     - ["Cyril Hansen"]
 ---
 
-PL/I (*Programming Language One*, prononcé « PL one ») a été conçu
-par IBM dans les années 1960 pour la programmation scientifique,
-commerciale et système. Il réunit programmation structurée,
-arithmétique décimale, chaînes de caractères et gestion des exceptions.
+PL/I (*Programming Language One*, prononcé « PL one ») est né chez IBM
+d'une ambition peu modeste pour les années 1960 : les scientifiques
+avaient FORTRAN, les gestionnaires COBOL, et la programmation système
+ses propres exigences. Pourquoi ne pas réunir tout cela dans un seul
+langage ? PL/I mêle ainsi structures de contrôle, calcul décimal,
+chaînes de caractères et traitement des exceptions.
 
-Ce tour d'horizon utilise **Digital Research PL/I-80** (1980), un
-compilateur CP/M fondé sur le projet de sous-ensemble généraliste
-(*General-Purpose Subset G*) du PL/I ANSI. D'autres compilateurs PL/I
-offrent des fonctionnalités supplémentaires et parfois d'autres
-conventions d'entrées-sorties.
+Nous utiliserons ici **Digital Research PL/I-80** (1980), un compilateur
+pour CP/M fondé sur le projet de sous-ensemble généraliste du PL/I ANSI
+(*General-Purpose Subset G*). Une bonne partie du langage des grands
+systèmes a survécu au passage sur 8 bits, même si le PL/I IBM complet
+offre davantage de fonctionnalités.
 
 Les commentaires du programme restent en ASCII pour faciliter sa
 réutilisation avec les outils CP/M historiques.
@@ -153,87 +155,86 @@ Digital Research.
 
 ### Pointeurs et gestion explicite de la mémoire
 
-PL/I dispose de pointeurs `POINTER` peu contraints, sans typage du
-contenu pointé. Une déclaration `BASED` décrit l'organisation des
-données à une adresse : elle n'alloue pas de mémoire par elle-même.
-Dans l'exemple, `ALLOCATE ... SET(pointer)` réserve de la mémoire
-dynamique et `FREE` la libère. La notation `pointer -> object`
-explicite le pointeur utilisé ; `BASED(pointer)` lui associe un
-pointeur implicite. `ADDR(variable)` permet aussi de superposer
-une vue `BASED` à une variable existante.
+PL/I laisse au programmeur une grande liberté avec la mémoire.
+Un `POINTER` ne porte pas le type des données qu'il désigne.
+C'est la déclaration `BASED` qui décrit comment interpréter la mémoire
+à cette adresse, sans pour autant l'allouer. Dans l'exemple,
+`ALLOCATE ... SET(pointer)` réserve une zone, et `FREE` la libère.
+On peut nommer explicitement le pointeur avec `pointer -> object`,
+ou l'indiquer dans la déclaration par `BASED(pointer)`.
+`ADDR(variable)` permet aussi d'accéder à une zone déjà existante.
 
-Il n'y a pas de ramasse-miettes : le programmeur gère la durée de vie
-des allocations. Contrairement à une variable `AUTOMATIC` ordinaire,
-une zone `BASED` reste allouée jusqu'à sa libération explicite.
-PL/I-80 implante les variables `AUTOMATIC` statiquement, sauf dans
-les procédures récursives.
+Cette liberté a sa contrepartie : pas de ramasse-miettes. Une allocation
+`BASED` reste en place jusqu'à sa libération. Autre particularité :
+PL/I-80 implante les variables `AUTOMATIC` ordinaires de façon statique,
+sauf dans les procédures récursives. Mieux vaut donc savoir à qui
+appartient chaque zone de mémoire.
 
 ### Arithmétique décimale et conversions automatiques
 
-En plus des entiers binaires et des flottants, PL/I propose des
-nombres décimaux à virgule fixe, comme `FIXED DECIMAL(7,2)`.
-Ils conviennent notamment aux montants monétaires :
-`AMOUNT = AMOUNT + 1.25;` utilise l'arithmétique décimale, avec
-une échelle définie, plutôt qu'un flottant binaire approximatif.
+PL/I ne se limite pas aux entiers binaires et aux flottants.
+Il sait aussi calculer en décimal à virgule fixe. Un
+`FIXED DECIMAL(7,2)` convient ainsi aux montants monétaires :
+`AMOUNT = AMOUNT + 1.25;` travaille en décimal, avec deux chiffres
+après la virgule, sans l'approximation des flottants binaires.
 
-PL/I convertit automatiquement de nombreuses représentations
-numériques et textuelles. Attention toutefois : **PL/I-80 convertit
-un `FIXED DECIMAL` en `FIXED BINARY` lorsqu'on mélange ces types
-dans une expression arithmétique** ; la partie fractionnaire
-peut être perdue. Pour les calculs sensibles à la précision, gardez
-des opérandes décimaux compatibles ou utilisez explicitement
-`DECIMAL(...)`, `BINARY(...)` et `DIVIDE(...)`.
+Le compilateur se charge de nombreuses conversions entre types
+numériques et chaînes. C'est commode, mais pas toujours sans perte :
+**PL/I-80 convertit un `FIXED DECIMAL` en `FIXED BINARY` lorsque
+ces types sont mélangés dans un calcul**. La partie fractionnaire
+peut alors disparaître. Si la précision compte, utilisez des
+opérandes décimaux compatibles ou les conversions explicites
+`DECIMAL(...)`, `BINARY(...)` et `DIVIDE(...)`. 
 
 ### Héritage de FORTRAN
 
-La programmation scientifique a influencé les types `FLOAT BINARY`,
-l'opérateur de puissance `**`, les boucles `DO` avec compteur et
-les fonctions mathématiques `SQRT`, `SIN` et `LOG`.
-Les tableaux multidimensionnels acceptent des bornes explicites :
-`GRID(0:2,1:3)` contient trois lignes et trois colonnes.
-Contrairement aux anciens sources FORTRAN à colonnes imposées,
-PL/I emploie un format libre.
+On reconnaît facilement la patte de FORTRAN : `FLOAT BINARY`,
+l'opérateur de puissance `**`, les boucles `DO` avec compteur,
+et les fonctions `SQRT`, `SIN` ou `LOG`. Les tableaux à plusieurs
+dimensions acceptent des bornes explicites : `GRID(0:2,1:3)`
+compte trois lignes et trois colonnes. PL/I abandonne le découpage
+historique des sources FORTRAN en colonnes fixes, mais conserve
+une grande partie de son vocabulaire numérique.
 
 ### Héritage de COBOL et écriture abrégée ou explicite
 
-Pour la programmation de gestion, PL/I reprend l'arithmétique
-décimale compacte, les structures hiérarchiques à membres numérotés,
-les sorties formatées `PUT EDIT`, ainsi que les fichiers en mode
-flux ou enregistrements.
+L'héritage de COBOL est tout aussi visible, mais ailleurs :
+arithmétique décimale, structures hiérarchiques à membres numérotés,
+sorties formatées `PUT EDIT`, fichiers en mode flux ou enregistrements.
 
-PL/I permet des déclarations courtes ou descriptives. Ainsi,
-`DCL RATE FIXED DEC(7,2);` et
-`DECLARE RATE FIXED DECIMAL(7,2);` sont équivalents.
-De même, `DCL TITLE CHAR(20) VAR;` équivaut à
+PL/I permet aussi d'écrire court ou de tout expliciter.
+`DCL RATE FIXED DEC(7,2);` signifie exactement la même chose que
+`DECLARE RATE FIXED DECIMAL(7,2);`. De même,
+`DCL TITLE CHAR(20) VAR;` équivaut à
 `DECLARE TITLE CHARACTER(20) VARYING;`.
-Autres couples : `PROC`/`PROCEDURE`, `PTR`/`POINTER`,
-`INIT`/`INITIAL`. Ce sont des variantes de notation,
-pas des versions différentes du langage ; les mots complets
-favorisent en général la lisibilité.
+On rencontre également `PROC`/`PROCEDURE`, `PTR`/`POINTER`,
+et `INIT`/`INITIAL`. Ce ne sont pas des dialectes différents :
+les formes courtes économisent de la frappe, les formes complètes
+facilitent la lecture des programmes anciens.
 
 ### Subset G et héritage des grands systèmes IBM
 
-IBM a développé PL/I à l'époque du System/360 pour rapprocher
-les usages scientifiques de FORTRAN et les applications de gestion
-de COBOL. Le projet de sous-ensemble généraliste (*Subset G*)
-en a conservé un noyau utilisable sur davantage de machines.
-Le PL/I-80 de Digital Research (1980) suivait ce projet avant
-la publication de la norme ANSI X3.74-1981 ; le sous-ensemble G
-a ensuite été révisé en 1987.
+PL/I s'inscrivait dans l'ambition du System/360 : une famille de
+machines capable de servir aussi bien le calcul scientifique que
+la gestion. Le projet de sous-ensemble généraliste (*Subset G*)
+en a retenu un noyau plus facile à porter. Digital Research suivait
+ce projet dès 1980, avant la publication de la norme ANSI X3.74-1981,
+révisée en 1987.
 
-Même sur un micro-ordinateur 8 bits sous CP/M, PL/I-80 conservait
-des mécanismes issus des grands systèmes : gestionnaires de
-conditions `ON`, procédures imbriquées, liaison `ENTRY` et
-`EXTERNAL`, pointeurs, types décimaux, entrées-sorties par flux
-et par enregistrements. Ses mots-clés dépendent aussi du contexte :
-beaucoup peuvent servir d'identifiants.
+Que restait-il d'un langage de grands systèmes sur une machine 8 bits
+sous CP/M ? Pas mal de choses : gestionnaires de conditions `ON`,
+procédures imbriquées, liaison `ENTRY` et `EXTERNAL`, pointeurs,
+arithmétique décimale, fichiers en mode flux et enregistrements.
+Même les mots-clés restent contextuels : beaucoup peuvent aussi
+servir de noms de variables.
 
-Ce n'est **pas le PL/I IBM complet**. PL/I-80 omet `DEFINED`,
-`LIKE`, `FLOAT DECIMAL`, les tableaux dynamiques et l'attribut
-de données `PICTURE`. La version 1.3 a toutefois ajouté le format
-de sortie distinct `P(...)` pour `PUT EDIT` ; cela ne rétablit pas
-l'attribut de données absent. Le sous-ensemble exclut également
-le stockage `CONTROLLED` et le multitâche du langage complet.
+Il y a bien sûr des limites. PL/I-80 omet `DEFINED`, `LIKE`,
+`FLOAT DECIMAL`, les tableaux dynamiques et l'attribut de données
+`PICTURE`. La version 1.3 a ajouté le format de sortie `P(...)`
+pour `PUT EDIT`, mais pas l'attribut de données correspondant.
+Le stockage `CONTROLLED` et le multitâche restent également absents.
+C'est un véritable sous-ensemble de PL/I, pas une reproduction
+miniature de toutes les fonctions du langage IBM.
 
 ## Pour aller plus loin
 
