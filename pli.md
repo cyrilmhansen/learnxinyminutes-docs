@@ -2,7 +2,7 @@
 name: PL/I
 filename: learnpli.pli
 contributors:
-    - ["cyrilmhansen", "https://github.com/cyrilmhansen"]
+    - ["Cyril Hansen"]
 ---
 
 PL/I (Programming Language One, pronounced "PL one") was designed by IBM
@@ -140,9 +140,9 @@ program. These commands are specific to the Digital Research toolchain.
 
 ## Further reading
 
-- Digital Research's *PL/I-80 Language Manual* (December 1980)
-  and *PL/I-80 Applications Guide* (December 1980) are in the
-  [DR PL/I manual collection][manuals].
+- [Digital Research PL/I-80 Language Manual (December 1980)][language].
+- [Digital Research PL/I-80 Applications Guide (December 1980)][apps].
 - [Iron Spring PL/I compiler for Linux](https://www.iron-spring.com/)
 
-[manuals]: https://github.com/cyrilmhansen/drpli/tree/main/manuals
+[language]: https://ftpmirror.your.org/pub/misc/bitsavers/pdf/digitalResearch/pl1/PL1-80_Language_Manual_Dec80.pdf
+[apps]: https://ftpmirror.your.org/pub/misc/bitsavers/pdf/digitalResearch/pl1/PL1-80_Applications_Guide_Dec80.pdf
