@@ -5,14 +5,16 @@ contributors:
     - ["Cyril Hansen"]
 ---
 
-PL/I (Programming Language One, pronounced "PL one") was designed by IBM
-in the 1960s for scientific, business, and systems programming. It combines
-structured programming, decimal arithmetic, strings, and exception handling.
+PL/I (Programming Language One, pronounced "PL one") grew out of an
+ambitious idea at IBM in the 1960s: scientific programmers had FORTRAN,
+business programmers had COBOL, and systems programmers had other needs.
+Why not try to serve them all with one language? PL/I brought structured
+programming, decimal arithmetic, strings, and condition handling together.
 
-This tour uses **Digital Research PL/I-80** (1980), a CP/M implementation
-based on the proposed ANSI PL/I General-Purpose Subset (Subset G).
-Other PL/I compilers offer additional features and sometimes different I/O
-conventions.
+This tour uses **Digital Research PL/I-80** (1980), a CP/M compiler based
+on the proposed ANSI PL/I General-Purpose Subset (Subset G). Much of the
+mainframe language survived the move to an 8-bit computer, though full
+IBM PL/I offers more features and sometimes different I/O conventions.
 
 ```text
 /* Comments start with slash-star and end with star-slash.
@@ -149,75 +151,76 @@ program. These commands are specific to the Digital Research toolchain.
 
 ### Pointers and explicit storage management
 
-PL/I has relatively permissive, untyped `POINTER` values. A `BASED`
-declaration describes a layout at an address, rather than allocating
-storage itself. As shown above, `ALLOCATE ... SET(pointer)` reserves
-heap space and `FREE` releases it. `pointer -> object` explicitly
-qualifies an access; `BASED(pointer)` supplies an implicit pointer.
-`ADDR(variable)` also permits a `BASED` view of existing storage.
+PL/I gives programmers unusual freedom with memory. A `POINTER` does
+not carry the type of the data it points to. Instead, a `BASED`
+declaration describes how to interpret storage at an address; it does
+not allocate that storage. In the example above, `ALLOCATE ... SET(pointer)`
+obtains space and `FREE` returns it. Use `pointer -> object` to name
+the pointer explicitly, or `BASED(pointer)` to supply it in the
+declaration. `ADDR(variable)` can also provide a view of existing data.
 
-There is no garbage collector: the programmer manages the lifetime of
-allocated blocks. Unlike ordinary `AUTOMATIC` storage, `BASED` storage
-remains allocated until explicitly freed. PL/I-80 implements
-`AUTOMATIC` variables statically except in recursive procedures.
+The freedom comes with a bill: there is no garbage collector. A `BASED`
+allocation stays alive until the program frees it. PL/I-80 also
+implements ordinary `AUTOMATIC` variables statically, except in
+recursive procedures. It pays to know which storage you own.
 
 ### Decimal arithmetic and automatic conversions
 
-Alongside binary integers and floating point, PL/I offers fixed-point
-decimal numbers such as `FIXED DECIMAL(7,2)`. This is useful for money:
-`AMOUNT = AMOUNT + 1.25;` performs decimal arithmetic with a specified
-scale rather than approximate binary floating-point arithmetic.
+PL/I is at home with decimal numbers as well as binary integers and
+floating point. `FIXED DECIMAL(7,2)`, for example, is a natural fit for
+money. `AMOUNT = AMOUNT + 1.25;` works in decimal arithmetic with a
+defined scale, not an approximation in binary floating point.
 
-PL/I automatically converts many numeric and string representations.
-But conversions are not always lossless: **PL/I-80 converts
-`FIXED DECIMAL` to `FIXED BINARY` when those types are mixed in an
-arithmetic expression**, potentially discarding a fractional part.
-Use compatible decimal operands or explicit `DECIMAL(...)`,
-`BINARY(...)`, and `DIVIDE(...)` conversions where precision matters.
+The compiler is helpful about conversions between numeric types and
+strings. Do not mistake that convenience for a promise of exactness.
+**PL/I-80 converts `FIXED DECIMAL` to `FIXED BINARY` when the two
+types are mixed in arithmetic**, and a fractional part may be lost.
+Keep decimal operands compatible, or use `DECIMAL(...)`,
+`BINARY(...)`, and `DIVIDE(...)` explicitly when precision matters.
 
 ### FORTRAN heritage
 
-Scientific programming influenced PL/I's `FLOAT BINARY`, `**`
-exponentiation, counted `DO` loops, and mathematical functions such
-as `SQRT`, `SIN`, and `LOG`. Multi-dimensional arrays can specify
-their bounds: `GRID(0:2,1:3)` has three rows and three columns.
-Unlike FORTRAN's historical fixed-column source, PL/I is free-format.
+FORTRAN's influence is easy to spot: `FLOAT BINARY`, `**` for powers,
+counted `DO` loops, and functions such as `SQRT`, `SIN`, and `LOG`.
+Multidimensional arrays have explicit bounds: `GRID(0:2,1:3)` has
+three rows and three columns. PL/I does away with FORTRAN's old
+fixed-column source format, but keeps much of its numerical vocabulary.
 
 ### COBOL heritage and long versus abbreviated spelling
 
-Business programming shows up in packed-decimal arithmetic, hierarchical
-structures with numbered members, formatted `PUT EDIT` output, and
-both stream and record-oriented file I/O.
+COBOL's influence is just as visible, though in different places:
+packed-decimal arithmetic, numbered members of hierarchical structures,
+formatted `PUT EDIT` output, and stream or record-oriented file I/O.
 
-PL/I also offers terse and descriptive forms of the same declarations.
-For example, `DCL RATE FIXED DEC(7,2);` and
-`DECLARE RATE FIXED DECIMAL(7,2);` are equivalent. Likewise,
-`DCL TITLE CHAR(20) VAR;` means the same as
+PL/I also offers a choice between compact and descriptive spelling.
+`DCL RATE FIXED DEC(7,2);` means exactly the same as
+`DECLARE RATE FIXED DECIMAL(7,2);`. Similarly,
+`DCL TITLE CHAR(20) VAR;` is equivalent to
 `DECLARE TITLE CHARACTER(20) VARYING;`.
-Other pairs include `PROC`/`PROCEDURE`, `PTR`/`POINTER`, and
-`INIT`/`INITIAL`. These are interchangeable spellings, not
-different language versions; full words generally aid readability.
+You will also encounter `PROC`/`PROCEDURE`, `PTR`/`POINTER`, and
+`INIT`/`INITIAL`. They are not separate dialects. The short forms
+save typing; the full forms make old code easier to read.
 
 ### Subset G and the IBM mainframe legacy
 
-IBM developed PL/I for the System/360 era to span scientific FORTRAN
-and commercial COBOL workloads. The proposed General-Purpose Subset G
-retained a core suited to more machines. Digital Research's 1980
-PL/I-80 followed that proposal before ANSI X3.74-1981 was published;
-the Subset G standard was later revised in 1987.
+PL/I was part of IBM's System/360 vision: one family of computers,
+and a language intended to bridge scientific and commercial work.
+The proposed General-Purpose Subset G kept a portable core.
+Digital Research's PL/I-80 followed that proposal in 1980, before
+ANSI X3.74-1981 appeared; the standard was revised in 1987.
 
-Even on an 8-bit CP/M computer, PL/I-80 preserved sophisticated
-mainframe-era facilities: `ON` condition handlers, nested procedures,
-`ENTRY` and `EXTERNAL` linkage, pointers, decimal types, and both
-stream and record I/O. Keywords are context-sensitive, too: many can
-also be used as identifiers.
+How much of that mainframe language could fit on an 8-bit CP/M machine?
+Quite a lot: `ON` condition handlers, nested procedures, `ENTRY`
+and `EXTERNAL` linkage, pointers, decimal arithmetic, and both stream
+and record I/O. Even keywords are context-sensitive: many can also
+serve as identifiers.
 
-It is **not full IBM PL/I**. PL/I-80 omits `DEFINED`, `LIKE`,
+There are limits, of course. PL/I-80 omits `DEFINED`, `LIKE`,
 `FLOAT DECIMAL`, dynamic arrays, and the `PICTURE` **data attribute**.
-Version 1.3 did add the distinct `P(...)` picture-style output format
-for `PUT EDIT`; this does not add the missing data attribute.
-It also omits full-language facilities such as `CONTROLLED` storage
-and multitasking.
+Version 1.3 added a separate `P(...)` picture-style format for
+`PUT EDIT`, but not the missing data attribute. `CONTROLLED`
+storage and multitasking also remain outside this subset.
+It is a practical subset of PL/I, not a miniature of every IBM feature.
 
 ## Further reading
 
